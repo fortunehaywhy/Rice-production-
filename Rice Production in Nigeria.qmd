@@ -1,0 +1,162 @@
+---
+title: "Rice Production in Nigeria"
+author: "Abdul-Ganiu Ayomide Bisiriyu"
+format: html
+editor: visual
+---
+
+### **Introduction: Rice Production in Nigeria and the Impact of Population Growth**
+
+Rice is a vital staple food in Nigeria, playing a critical role in the country's food security and economy. Nigeria has historically been one of the largest producers of rice in Africa, with significant growth in production over the decades. However, despite rapid population growth, the country has faced challenges in sustaining high levels of rice production. 
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+ suppressWarnings({
+  library(UsingR)
+  library(stringr)
+  library(tidyverse)
+  library(ggfortify)
+  library(dplyr)
+  library(plotly)
+   library(knitr)
+   library(xfun)
+   library(rmarkdown)
+   library(quarto)
+})
+
+
+```
+
+### **Data Analysis and Findings**
+
+#### **Sources of Data**
+
+The data used in this report were obtained from the following sources:
+
+-   **Rice Production Data**: Kaggle Statistics Database.
+
+-   **Population Data**: Macro Trends. (https://www.macrotrends.net/global-metrics/countries/NGA/nigeria/population)
+
+Note: The population data were divided by 10000 to aid a better visualization.
+
+```{r}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+#| echo: false 
+#| warning: false
+#| message: false
+#| error: false
+food1 <- read_csv("C:/Users/SAIL/Documents/world_food_production.csv")
+
+```
+
+#### **Overview of Rice Production in Nigeria**
+
+Rice cultivation in Nigeria has a long history, but significant modernization and expansion occurred from the 1960s onwards. The country produces various rice varieties, with a focus on meeting local consumption preferences, particularly long-grain rice.
+
+In 1968, Nigeria achieved its peak rice production of 16,000 tonnes, marking a significant milestone in domestic agricultural output. This period was characterized by government interventions and investments aimed at boosting agricultural productivity, including the promotion of improved seed varieties and irrigation infrastructure.
+
+```{r}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+#| echo: false 
+#| warning: false
+#| message: false
+#| error: false
+#| label: tbl-food1
+#| tbl-cap: "Food Production in Nigeria"
+#| tbl-cap-location: top
+food2 <- filter(food1, Entity == "Nigeria")
+kable(food2)
+
+```
+
+```{r}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+#| echo: false 
+#| warning: false
+#| message: false
+#| error: false
+#| label: tbl-plot1
+ggplotly(food1%>%
+           group_by(Entity)%>%
+           summarise(total= sum(`Maize Production (tonnes)`))%>%
+           ggplot(aes(x= Entity, y= total, fill = Entity))+
+           geom_col()+
+           theme(axis.text.x = element_text(angle=90))+
+           theme_classic()+
+           coord_flip())
+```
+
+#### **Impact of Population Growth**
+
+Nigeria's population has grown substantially, from approximately 45 million in 1961 to over 206 million in 2021, making it the most populous country in Africa. This demographic trend has profoundly influenced agricultural dynamics, including rice production.
+
+Despite the rapid population growth, rice production in Nigeria has not consistently kept pace. After reaching its peak of 16,000 tonnes in 1968, production began to decline steadily, affected by various factors such as inconsistent government policies, inadequate infrastructure, and challenges in accessing modern agricultural practices.
+
+By 2000, rice production had decreased to 2,000 tonnes, a significant drop from its peak. Despite efforts to revive production through various initiatives, including the Presidential Initiative on Rice and the Agricultural Transformation Agenda, challenges persisted. As of 2021, rice production further declined to 2,900 tonnes, highlighting ongoing struggles in achieving sustainable production levels amidst population growth and increasing demand.
+
+```{r}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+#| echo: false 
+#| warning: false
+#| message: false
+#| error: false
+#| label: tbl-food4
+#| tbl-cap: "Food Production and Population Growth in Nigeria"
+#| tbl-cap-location: top
+nigpop <- read_csv("C:/Users/SAIL/Desktop/Nigeria_Population.csv")
+nigpop1 <- nigpop[order(nigpop$Year), ]
+nigpop2 <- nigpop1[12:72,]
+food4 <- data.fr0ame(food2,nigpop2$Population)
+kable(food4)
+```
+
+#### **Challenges and Sustainability Issues**
+
+The decline in rice production despite population growth underscores several critical challenges:
+
+1.  **Infrastructure Deficiencies**: Inadequate irrigation systems, storage facilities, and transportation networks have hindered agricultural productivity.
+
+2.  **Policy Inconsistencies**: Fluctuating government policies and insufficient support for farmers have impacted long-term planning and investment in the sector.
+
+3.  **Environmental Pressures**: Deforestation, soil degradation, and climate change have posed additional threats to sustainable agriculture.
+
+4.  **Market Dynamics**: Competition from imported rice and price volatility have affected local production incentives.
+
+    ```{r}
+    knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+    #| echo: false 
+    #| warning: false
+    #| message: false
+    #| error: false
+    #| label: tbl-plot2
+    food4 <- food4%>%
+      rename(Population_times_10000= "nigpop2.Population")
+    food4$Population_times_10000 <- food4$Population_times_10000*10^-4
+    food5<- food4%>%
+      pivot_longer( cols =c(Rice..Production...tonnes.,Population_times_10000), names_to = "variables", values_to = "values" )
+    ggplotly(food5%>%
+      group_by(Entity)%>%
+      ggplot(aes(x= Year, y= values,colour =variables))+
+      geom_line()+
+      geom_point()+
+      geom_smooth(method = "lm"))
+    ```
+
+#### **Linear Modeling and Significance Testing**
+
+A linear regression model was fitted to quantify the relationship between rice production and population growth:
+
+-   **Regression Model**: Rice Production \~ Population
+
+-   **Coefficient Estimations**: The model revealed a highly significant relationship (p-value = 0.00281, less than 5%) between rice production and population growth.
+
+    ```{r}
+    model <- lm(Rice..Production...tonnes.~ Population_times_10000,food4)
+    summary(model)
+    ```
+
+### **Conclusion**
+
+The analysis underscores the critical interplay between rice production and population growth in Nigeria. Despite historical peaks in production, the sector has faced challenges leading to a decline over the years. Concurrently, population growth has continued unabated, exerting pressure on agricultural resources and necessitating sustainable strategies for food security.
+
+Moving forward, addressing infrastructure gaps, enhancing agricultural productivity through technological innovations, and implementing supportive policies will be crucial. By doing so, Nigeria can navigate the complexities posed by population growth and achieve sustainable rice production, ensuring food sufficiency and economic resilience in the years to come.
